@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ task.title }} - Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <section class="bg-white">
+        <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
+            <h2 class="mb-4 text-xl font-bold text-gray-900">Task Details</h2>
+            <div>
+                <h3 class="text-lg font-bold">Title:</h3>
+                <p>{{ task.title }}</p>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold">Description:</h3>
+                <p>{{ task.description }}</p>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold">Priority:</h3>
+                <p>{{ task.get_priority_display }}</p>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold">Status:</h3>
+                <p>{{ task.get_status_display }}</p>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold">Due Date:</h3>
+                <p>{{ task.due_date }}</p>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold">Photos:</h3>
+                <div class="flex flex-wrap">
+                    {% for photo in photos %}
+                        <img src="{{ photo.photo.url }}" alt="Task Photo" class="w-1/4 p-1">
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

@@ -19,12 +19,15 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('',views.index,name='index'),
-    path('login/',views.user_login,name='login'),
-    path('signup/',views.user_signup,name='register'),
-    path('logout/',views.user_logout,name='logout'),
-    
-    path('create/',views.create_task,name='createtask'),
+    path('', views.index, name='index'),
+    path('login/', views.user_login, name='login'),
+    path('signup/', views.user_signup, name='register'),
+    path('logout/', views.user_logout, name='logout'),
+
+    path('create/', views.create_task, name='createtask'),
     path('edit/<int:task_id>/', views.edit, name='edit'),
+
+    path('detail/<int:task_id>/', views.task_detail, name='task_detail'),
+    path('delete/<int:task_id>/', views.delete_task, name='delete_task'),
     # path('')
-] 
+]

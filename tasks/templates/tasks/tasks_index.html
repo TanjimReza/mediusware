@@ -3,27 +3,91 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Task Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body>
-    <h1>Tasks Index: {{user}}</h1>
-    {% for task in tasks %}
-    <div class="max-w-sm rounded overflow-hidden shadow-lg p-4 mb-4">
-      <div class="font-bold text-xl mb-2">{{ task.title }}</div>
-      <p class="text-gray-700 text-base">{{ task.description }}</p>
-      <p class="text-gray-600 text-sm">Due by: {{ task.due_date }}</p>
-      <!-- Photo gallery -->
-      <div class="grid grid-cols-3 gap-4 mt-4">
-        {% for photo in task.photos.all %}
-        <img
-          class="w-full h-32 object-cover"
-          src="{{ photo.photo.url }}"
-          alt="Task photo"
-        />
-        {% endfor %}
+    <div class="container mx-auto px-4 md:px-6 lg:px-8 py-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Search and Filters Column -->
+        <div class="col-span-1 lg:col-span-2">
+          <div class="flex items-center gap-2">
+            <!-- Search Input -->
+            <input
+              name="search"
+              id="search"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex-grow"
+              placeholder="Search..."
+              type="search"
+            />
+            <button
+              type="submit"
+              class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+            >
+              <!-- Search Icon -->
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="w-5 h-5"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Filters Column -->
+        <div class="col-span-1 lg:col-span-1">
+          <h2 class="font-semibold text-lg mb-4">Filters</h2>
+          <div class="space-y-4">
+            <!-- Creation Date Filter -->
+            <fieldset>
+              <legend class="font-medium mb-2">Created</legend>
+              <select
+                name="creation_date"
+                id="creation_date"
+                class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-full"
+              >
+                <option value="Last" selected>Last</option>
+                <option value="First">First</option>
+              </select>
+            </fieldset>
+            <!-- Completion Status Filter -->
+            <fieldset>
+              <legend class="font-medium mb-2">Completion Status</legend>
+              <select
+                name="completion_status"
+                id="completion_status"
+                class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-full"
+              >
+                <option value="incomplete">Incomplete</option>
+                <option value="completed">Completed</option>
+                <option value="all">All</option>
+              </select>
+            </fieldset>
+            <!-- Priority Filter -->
+            <fieldset>
+              <legend class="font-medium mb-2">Priority</legend>
+              <select
+                name="priority"
+                id="priority"
+                class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-full"
+              >
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </fieldset>
+          </div>
+        </div>
       </div>
     </div>
-    {% endfor %}
   </body>
 </html>
