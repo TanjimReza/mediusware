@@ -101,3 +101,14 @@ def delete_task_photo(request, photo_id):
         return HttpResponse('Photo deleted')
     else:
         return HttpResponse('Unauthorized', status=401)
+
+
+def edit(request, task_id):
+    task = Task.objects.get(id=task_id)
+    if request.method == 'POST':
+        task.title = request.POST.get('title')
+        task.description = request.POST.get('description')
+        task.due_date = request.POST.get('due_date')
+        task.save()
+        return redirect('index')
+    return render(request, 'tasks/edit.html', {'task': task})

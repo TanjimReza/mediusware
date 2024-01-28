@@ -40,6 +40,7 @@ class User(AbstractBaseUser):
     
     
 class Task(models.Model):
+    id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50, blank=False, null=False)
     description = models.TextField(blank=False, null=False)
     due_date = models.DateTimeField(blank=False, null=False)

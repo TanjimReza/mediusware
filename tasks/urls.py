@@ -25,5 +25,6 @@ urlpatterns = [
     path('logout/',views.user_logout,name='logout'),
     
     path('create/',views.create_task,name='createtask'),
+    path('edit/<int:task_id>/', views.edit, name='edit'),
     # path('')
 ] 
