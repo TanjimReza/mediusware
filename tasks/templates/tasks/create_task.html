@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Task</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  <body>
+    <section class="bg-white">
+      <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
+        <h2 class="mb-4 text-xl font-bold text-gray-900">Add a new task</h2>
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
+            <div class="sm:col-span-2">
+              <label
+                for="title"
+                class="block mb-2 text-sm font-medium text-gray-900"
+                >Task Title</label
+              >
+              <input
+                type="text"
+                name="title"
+                id="title"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                placeholder="Type task title"
+                required=""
+              />
+            </div>
+            <div class="sm:col-span-2">
+              <label
+                for="description"
+                class="block mb-2 text-sm font-medium text-gray-900"
+                >Description</label
+              >
+              <textarea
+                id="description"
+                name="description"
+                rows="4"
+                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Task description"
+              ></textarea>
+            </div>
+            <div class="">
+              <label
+                for="priority"
+                class="block mb-2 text-sm font-medium text-gray-900"
+                >Priority</label
+              >
+              <select
+                id="priority"
+                name="priority"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              >
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+            <div class="">
+              <label
+                for="status"
+                class="block mb-2 text-sm font-medium text-gray-900"
+                >Status</label
+              >
+              <select
+                id="status"
+                name="status"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              >
+                <option value="pending">Completed</option>
+                <option value="completed">Pending</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label
+                for="due_date"
+                class="block mb-2 text-sm font-medium text-gray-900"
+                >Due Date</label
+              >
+              <input
+                type="datetime-local"
+                name="due_date"
+                id="due_date"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                required=""
+              />
+            </div>
+            <div class="sm:col-span-2">
+              <label
+                for="product-images"
+                class="block mb-2 text-sm font-medium text-gray-900"
+                >Product Images</label
+              >
+              <div
+                class="border-dashed border-2 border-gray-300 rounded-lg text-center p-6"
+              >
+                <input
+                  id="product-images"
+                  type="file"
+                  name="photos"
+                  multiple
+                  class="hidden"
+                />
+                <p class="mb-3 font-semibold text-gray-900">
+                  Click to upload or drag and drop
+                </p>
+                <p class="text-gray-500 mb-3">Max. File Size: 30MB</p>
+                <label
+                  for="product-images"
+                  class="cursor-pointer px-3 py-1 bg-blue-600 text-white rounded-lg"
+                  >Upload Photos</label
+                >
+              </div>
+              <br />
+              <hr />
+              <ul id="file-list" class="list-disc pl-5 mt-3"></ul>
+            </div>
+
+            <div class="sm:col-span-2">
+              <button
+                type="submit"
+                class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800"
+              >
+                Add Task
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+  </body>
+  <script>
+    document
+      .getElementById("product-images")
+      .addEventListener("change", function () {
+        var fileList = document.getElementById("file-list");
+
+        for (var i = 0; i < this.files.length; i++) {
+          var listItem = document.createElement("li");
+          listItem.textContent = this.files[i].name;
+          fileList.appendChild(listItem);
+        }
+      });
+  </script>
+</html>
