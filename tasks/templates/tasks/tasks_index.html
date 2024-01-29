@@ -1,48 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Task Management</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body>
-    <div class="container mx-auto px-4 md:px-6 lg:px-8 py-6">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+  <div class="container mx-auto px-4 md:px-6 lg:px-8 py-6">
+    <form method="POST">
+      {% csrf_token %}
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Search and Filters Column -->
         <div class="col-span-1 lg:col-span-2">
           <div class="flex items-center gap-2">
             <!-- Search Input -->
-            <input
-              name="search"
-              id="search"
+            <input name="search" id="search"
               class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex-grow"
-              placeholder="Search..."
-              type="search"
-            />
-            <button
-              type="submit"
-              class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-            >
+              placeholder="Search..." type="search" />
+            <button type="submit"
+              class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
               <!-- Search Icon -->
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="w-5 h-5"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                 <circle cx="11" cy="11" r="8"></circle>
                 <path d="m21 21-4.3-4.3"></path>
               </svg>
             </button>
           </div>
+
+          <!-- Search Results -->
+          <div class="mt-10">
+            <h2 class="font-semibold text-xl mb-4">Search Results</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {% for task in tasks %}
+              <!-- Component: Blog card with avatar -->
+              <div class="overflow-hidden bg-white rounded shadow-md text-slate-500 shadow-slate-200">
+                <!-- Image -->
+                <figure>
+                  {% for photo in task.photos.all %}
+
+                  <img src="{{photo.photo.url}}" alt="card image" class="aspect-video w-full" />
+                  {% endfor %}
+                </figure>
+
+                <!-- Body-->
+                <div class="p-6">
+                  <header class="flex gap-4 mb-4">
+                    <a href="#"
+                      class="relative inline-flex items-center justify-center w-12 h-12 text-white rounded-full">
+                      <img src="https://i.pravatar.cc/48?img=24" alt="user name" title="user name" width="48"
+                        height="48" class="max-w-full rounded-full" />
+                    </a>
+                    <div>
+                      <h3 class="text-xl font-medium text-slate-700">
+                        {{task.title}}
+                      </h3>
+                      <p class="text-sm text-slate-400">{{task.due_date}}</p>
+                    </div>
+                  </header>
+                  <p>{{task.description}}</p>
+                </div>
+                <a href="{% url 'task_detail' task.id %}"
+                  class="flex items-center justify-center h-12 gap-2 px-6 text-sm font-medium tracking-wide transition duration-300 border rounded shadow-lg focus-visible:outline-none whitespace-nowrap border-emerald-500 text-emerald-500 shadow-emerald-200 hover:border-emerald-600 hover:text-emerald-600 focus:border-emerald-700 focus:text-emerald-700 hover:shadow-md hover:shadow-emerald-200 focus:shadow-md focus:shadow-emerald-200 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:text-emerald-300 disabled:shadow-none">
+                  <span>Show Details</span>
+                </a>
+              </div>
+              <!-- End Blog card with avatar -->
+              {% empty %}
+              <p>No tasks found.</p>
+              {% endfor %}
+            </div>
+            <!-- Component: Large outline elevated button -->
+
+            <!-- End Large outline elevated button -->
+          </div>
         </div>
+
         <!-- Filters Column -->
         <div class="col-span-1 lg:col-span-1">
           <h2 class="font-semibold text-lg mb-4">Filters</h2>
@@ -50,37 +86,32 @@
             <!-- Creation Date Filter -->
             <fieldset>
               <legend class="font-medium mb-2">Created</legend>
-              <select
-                name="creation_date"
-                id="creation_date"
-                class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-full"
-              >
-                <option value="Last" selected>Last</option>
+              <select name="creation_date" id="creation_date"
+                class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-full">
+                <option selected="selected" value="Last" selected>
+                  Last
+                </option>
                 <option value="First">First</option>
               </select>
             </fieldset>
+
             <!-- Completion Status Filter -->
             <fieldset>
               <legend class="font-medium mb-2">Completion Status</legend>
-              <select
-                name="completion_status"
-                id="completion_status"
-                class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-full"
-              >
-                <option value="incomplete">Incomplete</option>
+              <select name="completion_status" id="completion_status"
+                class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-full">
+                <option value="pending">Incomplete</option>
                 <option value="completed">Completed</option>
-                <option value="all">All</option>
+                <option selected="selected" value="all">All</option>
               </select>
             </fieldset>
+
             <!-- Priority Filter -->
             <fieldset>
               <legend class="font-medium mb-2">Priority</legend>
-              <select
-                name="priority"
-                id="priority"
-                class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-full"
-              >
-                <option value="high">High</option>
+              <select name="priority" id="priority"
+                class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-full">
+                <option selected="selected" value="high">High</option>
                 <option value="medium">Medium</option>
                 <option value="low">Low</option>
               </select>
@@ -88,6 +119,8 @@
           </div>
         </div>
       </div>
-    </div>
-  </body>
+    </form>
+  </div>
+</body>
+
 </html>

@@ -9,17 +9,36 @@ from django.contrib import messages
 # from django.contrib.auth import login as auth_login
 # from django.contrib.auth import logout as auth_logout
 
-
 def index(request):
-    if request.user.is_authenticated:
-        # Get tasks for the logged-in user
-        user_tasks = Task.objects.filter(user=request.user)
-        user_tasks = Task.objects.filter(
-            user=request.user).prefetch_related('photos')
-        return render(request, 'tasks/tasks_index.html', {'tasks': user_tasks})
+    if request.method == 'POST':
+        print("POST request")
+        print(request.POST)
+
+        search_query = request.POST.get('search', '')
+        creation_date = request.POST.get('creation_date', '')
+        completion_status = request.POST.get('completion_status', '')
+        priority = request.POST.get('priority', '')
+
+        tasks = Task.objects.all()
+        if search_query:
+            tasks = tasks.filter(title__icontains=search_query)
+        if creation_date == 'First':
+            tasks = tasks.order_by('created_at')
+        elif creation_date == 'Last':
+            tasks = tasks.order_by('-created_at')
+        if completion_status and completion_status != 'all':
+            tasks = tasks.filter(status=completion_status)
+        if priority:
+            tasks = tasks.filter(priority=priority)
     else:
-        return redirect('login')
-    return render(request, 'tasks/tasks_index.html')
+        print("GET request")
+        print(request.GET)
+        tasks = Task.objects.all()
+
+    context = {
+        'tasks': tasks
+    }
+    return render(request, 'tasks/tasks_index.html', context)
 
 
 def user_login(request):
