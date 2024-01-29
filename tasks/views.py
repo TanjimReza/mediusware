@@ -14,30 +14,51 @@ from django.contrib.auth.decorators import login_required
 # from django.contrib.auth import logout as auth_logout
 
 
-class TaskListView(LoginRequiredMixin,ListView):
+class TaskListView(LoginRequiredMixin, ListView):
     model = Task
     template_name = 'tasks/tasks_index.html'
     context_object_name = 'tasks'
     paginate_by = 10
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().filter(user=self.request.user)
+
         search_query = self.request.GET.get('search', '')
-        creation_date = self.request.GET.get('creation_date', '')
-        completion_status = self.request.GET.get('completion_status', '')
-        priority = self.request.GET.get('priority', '')
-        if search_query:
+        creation_date = self.request.GET.get('creation_date', 'Last')
+        completion_status = self.request.GET.get('completion_status', 'all')
+        priority = self.request.GET.get('priority', 'all')
+
+        print(self.request.GET)
+        print(search_query, creation_date, completion_status, priority)
+
+        # if completion_status != 'all':
+        #     queryset = queryset.filter(status=completion_status)
+
+        if search_query == '':
+            print("No search query")
+
+        else:
             queryset = queryset.filter(title__icontains=search_query)
-        if creation_date == 'First':
-            queryset = queryset.order_by('created_at')
-        elif creation_date == 'Last':
+
+        if creation_date == 'Last':
             queryset = queryset.order_by('-created_at')
-        if completion_status and completion_status != 'all':
-            queryset = queryset.filter(status=completion_status)
-        if priority:
-            queryset = queryset.filter(priority=priority)
+        elif creation_date == 'First':
+            queryset = queryset.order_by('created_at')
+
+        if completion_status == 'pending':
+            queryset = queryset.filter(status='pending')
+        elif completion_status == 'completed':
+            queryset = queryset.filter(status='completed')
+
+        if priority == 'low':
+            queryset = queryset.filter(priority='low')
+        elif priority == 'medium':
+            queryset = queryset.filter(priority='medium')
+        elif priority == 'high':
+            queryset = queryset.filter(priority='high')
 
         return queryset
+
 
 class UserLoginView(View):
     template_name = 'tasks/user_login.html'
@@ -83,11 +104,11 @@ class UserSignupView(View):
 
 def user_logout(request):
     logout(request)
-    
+
     return render(request, 'tasks/user_logout.html')
 
 
-class TaskCreateView(LoginRequiredMixin,View):
+class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'tasks/create_task.html'
 
     def get(self, request):
@@ -97,9 +118,11 @@ class TaskCreateView(LoginRequiredMixin,View):
         title = request.POST.get('title')
         description = request.POST.get('description')
         due_date = request.POST.get('due_date')
+        status = request.POST.get('status')
+        priority = request.POST.get('priority')
 
         task = Task(title=title, description=description,
-                    due_date=due_date, user=request.user)
+                    due_date=due_date, user=request.user, status=status, priority=priority)
         task.save()
 
         for file in request.FILES.getlist('photos'):
@@ -111,18 +134,18 @@ class TaskCreateView(LoginRequiredMixin,View):
         return redirect('task_list')
 
 
-class DeleteTaskPhotoView(LoginRequiredMixin,View):
+class DeleteTaskPhotoView(LoginRequiredMixin, View):
 
     def get(self, request, photo_id):
         photo = TaskPhoto.objects.get(id=photo_id)
-        if photo.task.user == request.user:  
+        if photo.task.user == request.user:
             photo.delete()
             return HttpResponse('Photo deleted')
         else:
             return HttpResponse('Unauthorized', status=401)
 
 
-class DeleteTaskView(LoginRequiredMixin,View):
+class DeleteTaskView(LoginRequiredMixin, View):
     template_name = 'tasks/confirm_delete.html'
 
     def get(self, request, task_id):

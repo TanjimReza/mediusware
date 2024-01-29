@@ -8,7 +8,13 @@
   </head>
 
   <body>
-    <div class="flex justify-end position-center w-full">
+    <div class="flex justify-end position-center w-full gap-2 mt-2">
+      <a
+        href="{% url 'create_task' %}"
+        class="inline-block text-sm px-4 py-2 leading-none border rounded text-green-500 border-green-400 hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
+      >
+        Create Task
+      </a>
       <a
         href="{% url 'logout' %}"
         class="inline-block text-sm px-4 py-2 leading-none border rounded text-red-500 border-red-400 hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
@@ -17,8 +23,7 @@
       </a>
     </div>
     <div class="container mx-auto px-4 md:px-6 lg:px-8 py-6">
-      <form method="POST">
-        {% csrf_token %}
+      <form method="GET">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <!-- Search and Filters Column -->
           <div class="col-span-1 lg:col-span-2">
@@ -27,6 +32,7 @@
               <input
                 name="search"
                 id="search"
+                value="{{ request.GET.search }}"
                 class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex-grow"
                 placeholder="Search..."
                 type="search"
@@ -157,9 +163,10 @@
                   id="priority"
                   class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-full"
                 >
-                  <option selected="selected" value="high">High</option>
+                  <option value="high">High</option>
                   <option value="medium">Medium</option>
                   <option value="low">Low</option>
+                  <option value="all" selected="selected">All</option>
                 </select>
               </fieldset>
             </div>
