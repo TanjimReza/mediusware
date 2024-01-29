@@ -5,48 +5,47 @@ from django.contrib.auth import authenticate, login, logout
 from django.views import View
 from .models import TaskUser, Task, TaskPhoto
 from django.contrib import messages
+from django.views.generic.list import ListView
+from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 #! Usually I do this but not doing it for this project to keep the naming convention
 # from django.contrib.auth import login as auth_login
 # from django.contrib.auth import logout as auth_logout
 
-def index(request):
-    if request.method == 'POST':
-        print("POST request")
-        print(request.POST)
 
-        search_query = request.POST.get('search', '')
-        creation_date = request.POST.get('creation_date', '')
-        completion_status = request.POST.get('completion_status', '')
-        priority = request.POST.get('priority', '')
+class TaskListView(LoginRequiredMixin,ListView):
+    model = Task
+    template_name = 'tasks/tasks_index.html'
+    context_object_name = 'tasks'
+    paginate_by = 10
 
-        tasks = Task.objects.all()
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        creation_date = self.request.GET.get('creation_date', '')
+        completion_status = self.request.GET.get('completion_status', '')
+        priority = self.request.GET.get('priority', '')
         if search_query:
-            tasks = tasks.filter(title__icontains=search_query)
+            queryset = queryset.filter(title__icontains=search_query)
         if creation_date == 'First':
-            tasks = tasks.order_by('created_at')
+            queryset = queryset.order_by('created_at')
         elif creation_date == 'Last':
-            tasks = tasks.order_by('-created_at')
+            queryset = queryset.order_by('-created_at')
         if completion_status and completion_status != 'all':
-            tasks = tasks.filter(status=completion_status)
+            queryset = queryset.filter(status=completion_status)
         if priority:
-            tasks = tasks.filter(priority=priority)
-    else:
-        print("GET request")
-        print(request.GET)
-        tasks = Task.objects.all()
+            queryset = queryset.filter(priority=priority)
 
-    context = {
-        'tasks': tasks
-    }
-    return render(request, 'tasks/tasks_index.html', context)
+        return queryset
 
+class UserLoginView(View):
+    template_name = 'tasks/user_login.html'
 
-def user_login(request):
+    def get(self, request):
+        return render(request, self.template_name)
 
-    if request.method == 'GET':
-        return render(request, 'tasks/user_login.html')
-
-    elif request.method == 'POST':
+    def post(self, request):
         email = request.POST.get('email')
         password = request.POST.get('password')
 
@@ -55,50 +54,49 @@ def user_login(request):
         if user is not None:
             print(f"Logging in {user}")
             login(request, user)
-            return redirect('index')
+            return redirect('task_list')
         else:
             print(f"TaskUser not found")
             error = {
                 'error': 'Invalid Credentials'
             }
-            return redirect('login')
-
-    return render(request, 'tasks/user_login.html')
+            return render(request, self.template_name, error)
 
 
-def user_signup(request):
+class UserSignupView(View):
+    template_name = 'tasks/user_signup.html'
 
-    if request.method == 'GET':
-        return render(request, 'tasks/user_signup.html')
+    def get(self, request):
+        return render(request, self.template_name)
 
-    elif request.method == 'POST':
+    def post(self, request):
         email = request.POST.get('email')
         full_name = request.POST.get('full_name')
         password = request.POST.get('password')
 
-        print(email, full_name, password)
         user = TaskUser.objects.create_user(
             email=email, full_name=full_name, password=password)
         user.save()
 
-        print("TaskUser created")
-
         return redirect('login')
-
-    return render(request, 'tasks/user_signup.html')
 
 
 def user_logout(request):
+    logout(request)
+    
     return render(request, 'tasks/user_logout.html')
 
 
-def create_task(request):
-    if request.method == 'POST':
+class TaskCreateView(LoginRequiredMixin,View):
+    template_name = 'tasks/create_task.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
         title = request.POST.get('title')
         description = request.POST.get('description')
         due_date = request.POST.get('due_date')
-        print(request.POST)
-        print(request.FILES)
 
         task = Task(title=title, description=description,
                     due_date=due_date, user=request.user)
@@ -110,20 +108,35 @@ def create_task(request):
             except Exception as e:
                 print(f"TaskImage Failed! Exception: {e}")
 
-        return redirect('index')
-    return render(request, 'tasks/create_task.html')
+        return redirect('task_list')
 
 
-def delete_task_photo(request, photo_id):
-    # Ensure the user is authorized to delete the photo
-    photo = TaskPhoto.objects.get(id=photo_id)
-    if photo.task.user == request.user:  # Check ownership
-        photo.delete()
-        return HttpResponse('Photo deleted')
-    else:
-        return HttpResponse('Unauthorized', status=401)
+class DeleteTaskPhotoView(LoginRequiredMixin,View):
+
+    def get(self, request, photo_id):
+        photo = TaskPhoto.objects.get(id=photo_id)
+        if photo.task.user == request.user:  
+            photo.delete()
+            return HttpResponse('Photo deleted')
+        else:
+            return HttpResponse('Unauthorized', status=401)
 
 
+class DeleteTaskView(LoginRequiredMixin,View):
+    template_name = 'tasks/confirm_delete.html'
+
+    def get(self, request, task_id):
+        task = get_object_or_404(Task, id=task_id, user=request.user)
+        return render(request, self.template_name, {'task': task})
+
+    def post(self, request, task_id):
+        task = get_object_or_404(Task, id=task_id, user=request.user)
+        task.delete()
+        messages.success(request, 'Task deleted successfully.')
+        return redirect('task_list')
+
+
+@login_required
 def edit(request, task_id):
     task = get_object_or_404(Task, id=task_id, user=request.user)
 
@@ -136,30 +149,19 @@ def edit(request, task_id):
 
         task.save()
 
-        # Handle photo uploads (if any)
         for file in request.FILES.getlist('photos'):
             try:
                 TaskPhoto.objects.create(task=task, photo=file)
             except Exception as e:
                 print(f"Error uploading photo: {e}")
 
-        return redirect('index')
+        return redirect('task_list')
 
     return render(request, 'tasks/edit_task.html', {'task': task})
 
 
+@login_required
 def task_detail(request, task_id):
     task = get_object_or_404(Task, id=task_id, user=request.user)
     photos = task.photos.all()
     return render(request, 'tasks/task_detail.html', {'task': task, 'photos': photos})
-
-
-def delete_task(request, task_id):
-    task = get_object_or_404(Task, id=task_id, user=request.user)
-
-    if request.method == 'POST':
-        task.delete()
-        messages.success(request, 'Task deleted successfully.')
-        return redirect('index')
-
-    return render(request, 'tasks/confirm_delete.html', {'task': task})
